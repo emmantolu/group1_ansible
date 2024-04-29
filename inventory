@@ -1,0 +1,5 @@
+192.168.100.10 ansible_host=control
+
+192.168.100.20 ansible_host=node1
+
+192.168.100.30 ansible_host=node2
