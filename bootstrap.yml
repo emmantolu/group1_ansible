@@ -16,3 +16,12 @@
       upgrade: dist
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
+
+  - name: Create user admin
+    user:
+      name: admin
+      group: admin1
+      groups:
+        - sudo
+        - adm
+        - root
