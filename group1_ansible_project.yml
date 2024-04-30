@@ -1,0 +1,18 @@
+---
+
+- hosts: all
+  become: true
+  taks: 
+  
+
+  - name: install updates (OracleLinux)
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distributipn == "OracleLinux"
+
+  - name: install updates (ubuntu)
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
