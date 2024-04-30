@@ -1,3 +1,9 @@
-node1 ansible_host=192.168.100.20
+[web_servers]
+192.168.100.20
 
-node2 ansible_host=192.168.100.30
+[db_servers]
+192.168.100.30
+
+[file_servers]
+192.168.100.20
+192.168.100.30
