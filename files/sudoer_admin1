@@ -1,0 +1,3 @@
+# Make admin1 a sudoer
+
+admin1 ALL=(ALL:ALL) NOPASSWD:ALL

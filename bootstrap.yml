@@ -5,23 +5,31 @@
   tasks: 
   
 
-  - name: install updates (OracleLinux)
+  - name: Fully Update Software (OracleLinux)
     dnf:
       update_only: yes
       update_cache: yes
-    when: ansible_distributipn == "OracleLinux"
+    when: ansible_distribution == "OracleLinux"
 
-  - name: install updates (ubuntu)
+  - name: Fully Update Software (Ubuntu)
     apt:
       upgrade: dist
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
 
-  - name: Create user admin
+  - name: Create user admin1
     user:
-      name: admin
-      group: admin1
+      name: admin1
       groups:
         - sudo
         - adm
         - root
+      shell: /bin/bash
+
+  - name: Make admin1 user a sudoer
+    copy:
+      src: sudoer_admin1
+      dest: /etc/sudoers.d/admin1
+      owner: root
+      group: root
+      mode: 0440
