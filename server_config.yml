@@ -164,3 +164,23 @@
       state: started
       enabled: yes
 
+  - name: Configure Firewall for samba (Ubuntu)
+    ufw:
+      name: "Samba"
+      rule: allow
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Configure Firewall for Samba (Oracle Linux)
+    firewalld:
+      service: samba
+      permanent: yes
+    when: ansible_distribution == "OracleLinux"
+
+  
+  - name: Copy admin_manual to each node
+    copy:
+      src: admin_manual
+      dest: /usr/local/bin/admin_manual
+      owner: admin1
+      group: admin1
+      mode: 0440
