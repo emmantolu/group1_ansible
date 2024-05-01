@@ -1,6 +1,6 @@
 --- 
 
-- hosts: all
+- hosts: web_servers
   become: true
   pre_tasks:
      
@@ -40,3 +40,34 @@
        state: started
        enabled: yes
      when: ansible_distribution == "OracleLinux"
+
+
+   - name: Change email address for Admin (Oracle Linux)
+     lineinfile:
+       path: /etc/httpd/conf/httpd.conf
+       regexp: "^ServerAdmin"
+       line: ServerAdmin martin.mato@ingrydacademy.com
+     when: ansible_distribution == "OracleLinux"
+     register: email
+
+   - name: restart apache (Oracle Linux)
+     service:
+      name: httpd
+      state: restarted
+     when: email.changed
+
+
+   - name: Change email address for Admin (Oracle Linux)
+    lineinfile:
+       path: /etc/apache2/sites-available/000-default.conf
+       regexp: "ServerAdmin"
+       line: ServerAdmin martin.mato@ingrydacademy.com
+    when: ansible_distribution == "Ubuntu"
+    register: apache
+
+  - name: restart apache (Ubuntu)
+    service:
+      name: apache2
+      state: restarted
+    when: apache.changed
+
