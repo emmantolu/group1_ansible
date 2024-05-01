@@ -17,7 +17,7 @@
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
 
-  - name: Create user admin1
+  - name: Create user admin1 (Ubuntu)
     user:
       name: admin1
       groups:
@@ -25,6 +25,17 @@
         - adm
         - root
       shell: /bin/bash
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Create user admin1 (Oracle Linux)
+    user:
+      name: admin1
+      groups:
+        - wheel
+        - adm
+        - root
+    when: ansible_distribution == "OracleLinux"
+
 
   - name: Make admin1 user a sudoer
     copy:

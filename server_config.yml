@@ -115,16 +115,9 @@
   
   tasks:
     - name: Install MySQL on Ubuntu
-      apt:
+      package:
         name: mysql-server
         state: latest
-      when: ansible_distribution == 'Ubuntu'
-
-    - name: Install MySQL on OracleLinux
-      yum:
-        name: mysql-server
-        state: latest
-      when: ansible_distribution == 'OracleLinux'
 
     - name: Start and enable MySQL on Ubuntu
       service:
@@ -153,3 +146,21 @@
         password: mySQLingryd
         login_unix_socket: yes
       when: ansible_distribution == 'OracleLinux'
+
+
+- name: File Servers
+  hosts: file_servers
+  become: yes
+  tasks:
+   
+  - name: Install samba on every file server
+    package:
+      name: samba
+      state: latest
+
+  - name: Start and enable samba
+    service: 
+      name: samba
+      state: started
+      enabled: yes
+
