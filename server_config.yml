@@ -54,20 +54,57 @@
      service:
       name: httpd
       state: restarted
-     when: email.changed
+     when: ansible_distribution == "OracleLinux" and email.changed
 
 
    - name: Change email address for Admin (Oracle Linux)
-    lineinfile:
+     lineinfile:
        path: /etc/apache2/sites-available/000-default.conf
        regexp: "ServerAdmin"
        line: ServerAdmin martin.mato@ingrydacademy.com
-    when: ansible_distribution == "Ubuntu"
-    register: apache
+     when: ansible_distribution == "Ubuntu"
+     register: apache
 
-  - name: restart apache (Ubuntu)
-    service:
+   - name: restart apache (Ubuntu)
+     service:
       name: apache2
       state: restarted
-    when: apache.changed
+     when: ansible_distribution == "Ubuntu" and apache.changed
 
+
+   - name: Configure Firewall for web_servers (Ubuntu)
+     ufw:
+       state: enabled
+       rule: allow
+       name: '{{ item }}'
+     with_items:
+       - "Apache Full"
+       - "OpenSSH"
+     when: ansible_distribution == "Ubuntu"
+     register: ufw    
+
+   - name: Enable Firewall (Ubuntu)
+     service:
+       name: ufw
+       state: restarted
+       enabled: yes
+     when: ansible_distribution == "Ubuntu" and ufw.changed
+
+   - name: Configure Firewall for web_servers (Oracle Linux)
+     firewalld:
+       service: '{{ item }}'
+       permanent: yes
+       state: enabled
+     with_items:
+       - http
+       - https
+       - ssh
+     when: ansible_distribution == "OracleLinux"
+     register: firewalld
+
+   - name: Enable Firewall (Oracle Linux)
+     service:
+       name: firewalld
+       state: restarted
+       enabled: yes
+     when: ansible_distribution == "OracleLinux" and firewalld.changed

@@ -37,5 +37,6 @@
   - name: Add ansible ssh key to each node
     authorized_key:
       user: admin1 
-      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrg1cX7DXn6+C3wsMJCgXPBz2s716OaekYTybOR8ASz ansible
+      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIw6EVTVUZ+ZCg/VX9+FsRltfmCUalvOKvrtMvXr+K6j Ansible
+
 
