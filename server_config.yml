@@ -119,6 +119,7 @@
         name: mysql-server
         state: latest
 
+
     - name: Start and enable MySQL on Ubuntu
       service:
         name: mysql
@@ -132,6 +133,7 @@
         state: started
         enabled: yes
       when: ansible_distribution == 'OracleLinux'
+
 
     - name: Set MySQL root password on Ubuntu
       mysql_user:
@@ -164,6 +166,7 @@
       state: started
       enabled: yes
 
+
   - name: Configure Firewall for samba (Ubuntu)
     ufw:
       name: "Samba"
@@ -184,3 +187,9 @@
       owner: admin1
       group: admin1
       mode: 0440
+
+
+  - name: Download Pycharm Community Edition to each node
+    get_url:
+      url: "https://download.jetbrains.com/python/pycharm-community-2021.3.1.tar.gz"
+      dest: /usr/local/bin/pycharm-community-2021.3.1.tar.gz
