@@ -108,3 +108,47 @@
        state: restarted
        enabled: yes
      when: ansible_distribution == "OracleLinux" and firewalld.changed
+
+- name: Configure database servers
+  hosts: db_servers
+  become: yes
+  tasks:
+    - name: Install MySQL on Ubuntu
+      apt:
+        name: mysql-server
+        state: latest
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install MySQL on OracleLinux
+      yum:
+        name: mysql-server
+        state: latest
+      when: ansible_distribution == 'OracleLinux'
+
+    - name: Start and enable MySQL on Ubuntu
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Start and enable MySQL on OracleLinux
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+      when: ansible_distribution == 'OracleLinux'
+
+    - name: Set MySQL root password on Ubuntu
+      mysql_user:
+        name: root
+        password: mySQLingryd
+        host: localhost
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Set MySQL root password on OracleLinux
+      mysql_user:
+        name: root
+        password: mySQLingryd
+        login_unix_socket: yes
+      when: ansible_distribution == 'OracleLinux'
