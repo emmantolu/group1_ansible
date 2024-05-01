@@ -112,6 +112,7 @@
 - name: Configure database servers
   hosts: db_servers
   become: yes
+  
   tasks:
     - name: Install MySQL on Ubuntu
       apt:
