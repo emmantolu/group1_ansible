@@ -1,0 +1,17 @@
+--- 
+
+- hosts: all
+  become: true
+  pre_tasks:
+     
+   - name: Update cache (Ubuntu)
+     apt:
+      update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "Ubuntu"
+
+   - name: Update cache (Oracle Linux)
+     dnf:
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "OracleLinux"
