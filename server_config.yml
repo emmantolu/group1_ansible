@@ -57,7 +57,7 @@
      when: ansible_distribution == "OracleLinux" and email.changed
 
 
-   - name: Change email address for Admin (Oracle Linux)
+   - name: Change email address for Admin (Ubuntu)
      lineinfile:
        path: /etc/apache2/sites-available/000-default.conf
        regexp: "ServerAdmin"
