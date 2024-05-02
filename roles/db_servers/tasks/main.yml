@@ -1,0 +1,62 @@
+---
+#---------------------------Install and activate mySQL server------------------------
+
+- name: Install MySQL
+  tags: get_mysql
+  package:
+    name: mysql-server
+    state: latest
+
+- name: Start and enable MySQL on OracleLinux
+  tags: get_mysql
+  service:
+    name: mysqld
+    state: started
+    enabled: yes
+  when: ansible_distribution == 'OracleLinux'
+
+#----------------------Install Ansible requirements for mysql_user module----------------------------
+
+- name: Install mysql_user requirements (Ubuntu)
+  tags: mysql_config
+  apt:
+    name:
+      - python3-pip, python3-virtualenv, python3-wheel, gcc
+      - python3-dev, default-libmysqlclient-dev, build-essential, pkg-config
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install mysql_user requirements (Oracle Linux)
+  tags: mysql_config
+  dnf:
+    name:
+      - python3-pip, python3-virtualenv, python3-wheel
+      - python3-devel, mysql-devel, pkgconfig, gcc
+  when: ansible_distribution == "OracleLinux"
+
+- name: Install mysqlclient python package
+  tags: mysql_config
+  ansible.builtin.pip:
+    name: mysqlclient
+
+# -------------Login with default credentials and set root user password------------------------------
+
+- name: Set MySQL root password on Ubuntu
+  tags: mysql_config
+  mysql_user:
+    name: root
+    password: mySQLingryd
+    host: localhost
+    login_user: root
+    login_password: ""
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Set MySQL root password on OracleLinux
+  tags: mysql_config,mysql_setup
+  mysql_user:
+    name: root
+    password: mySQLingryd
+    state: present
+    host: localhost
+    login_user: root
+    login_password: ""
+  when: ansible_distribution == 'OracleLinux'
