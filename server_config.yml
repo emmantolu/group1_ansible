@@ -5,7 +5,7 @@
   become: true
   roles:
     - web_servers
-    
+
 #=====================================================================PLAYS FOR DATABASE SERVERS========================================================================
 
 - name: Configure database servers
@@ -19,56 +19,8 @@
 - name: File Servers
   hosts: file_servers
   become: yes
-  tasks:
-    #-------------------Install and enable samba---------------
-
-    - name: Install samba on every file server
-      tags: get_samba
-      package:
-        name: samba
-        state: latest
-
-    - name: Start and enable samba
-      tags: get_samba
-      service:
-        name: samba
-        state: started
-        enabled: yes
-
-    #------------Configure Firewall to allow samba--------------
-
-    - name: Configure Firewall for samba (Ubuntu)
-      tags: allow_samba
-      ufw:
-        name: "Samba"
-        rule: allow
-      when: ansible_distribution == "Ubuntu"
-
-    - name: Configure Firewall for Samba (Oracle Linux)
-      tags: allow_samba
-      firewalld:
-        service: samba
-        permanent: yes
-      when: ansible_distribution == "OracleLinux"
-
-    #----------Copy admin_manual to each node---------------------
-
-    - name: Copy admin_manual to each node
-      tags: admin_manual
-      copy:
-        src: admin_manual
-        dest: /usr/local/bin/admin_manual
-        owner: admin1
-        group: admin1
-        mode: 0440
-
-    #------------------------------------Download Pycharm--------------------------------
-
-    - name: Download Pycharm Community Edition to each node
-      tags: get_pycharm
-      get_url:
-        url: "https://download.jetbrains.com/python/pycharm-community-2021.3.1.tar.gz"
-        dest: /usr/local/bin/pycharm-community-2021.3.1.tar.gz
+  roles:
+    - file_servers
 
 #=======================================================================ANSIBLE VAULT PLAY===============================================================================
 
@@ -76,5 +28,4 @@
   become: true
   roles:
     - base
-
 #========================================================================================================================================================================
