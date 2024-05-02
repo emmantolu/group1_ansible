@@ -4,6 +4,7 @@
   become: true
   tasks: 
   
+#==========================================================FULLY UPDATE MULTI-DISTRO SOFTWARE===========================================================================
 
   - name: Fully Update Software (OracleLinux)
     dnf:
@@ -16,6 +17,8 @@
       upgrade: dist
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
+
+#=======================================================CREATE ADMIN1 USER AND MAKE ADMIN1 A SUDOER=====================================================================
 
   - name: Create user admin1 (Ubuntu)
     user:
@@ -44,6 +47,8 @@
       owner: root
       group: root
       mode: 0440
+
+#----------------------------Add SSH key for admin1-----------------------------------------------
 
   - name: Add ansible ssh key to each node
     authorized_key:
