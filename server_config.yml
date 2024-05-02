@@ -1,16 +1,22 @@
 --- 
 
+#=========================================================================PLAYS FOR WEB SERVERS===========================================================================
+
 - hosts: web_servers
   become: true
   pre_tasks:
+
+#---------------------Update Multi-distro Caches--------------------------------
      
    - name: Update cache (Ubuntu)
+     tags: update_cache
      apt:
       update_cache: yes
      changed_when: false
      when: ansible_distribution == "Ubuntu"
 
    - name: Update cache (Oracle Linux)
+     tags: update_cache
      dnf:
        update_cache: yes
      changed_when: false
@@ -18,7 +24,10 @@
 
   tasks:
 
+#-------------------Install apache and supporting packages-----------------------
+
    - name: Install apache2 and support packages (Ubuntu)
+     tags: get_apache,apache
      apt:
       name:
         - apache2
@@ -27,6 +36,7 @@
      when: ansible_distribution == "Ubuntu"
 
    - name: Install apache2 and support packages (Oracle Linux)
+     tags: get_apache,apache
      dnf:
       name:
         - httpd
@@ -34,15 +44,20 @@
       state: latest
      when: ansible_distribution == "OracleLinux"
 
+#-------------------Start and enable apache(httpd) on Oracle Linux----------------
+
    - name: Start and enable apache (Oracle Linux)
+     tags: start_httpd,apache
      service:
        name: httpd
        state: started
        enabled: yes
      when: ansible_distribution == "OracleLinux"
 
+#--------------Update the ServerAdmin contact info and restart apache if successful---------------
 
    - name: Change email address for Admin (Oracle Linux)
+     tags: email_update,apache
      lineinfile:
        path: /etc/httpd/conf/httpd.conf
        regexp: "^ServerAdmin"
@@ -58,6 +73,7 @@
 
 
    - name: Change email address for Admin (Ubuntu)
+     tags: email_update,apache
      lineinfile:
        path: /etc/apache2/sites-available/000-default.conf
        regexp: "ServerAdmin"
@@ -72,7 +88,10 @@
      when: ansible_distribution == "Ubuntu" and apache.changed
 
 
+#-------------------Configure and enable Firewalls to allow all web traffic-----------------------
+
    - name: Configure Firewall for web_servers (Ubuntu)
+     tags: allow_apache
      ufw:
        state: enabled
        rule: allow
@@ -91,6 +110,7 @@
      when: ansible_distribution == "Ubuntu" and ufw.changed
 
    - name: Configure Firewall for web_servers (Oracle Linux)
+     tags: allow_httpd
      firewalld:
        service: '{{ item }}'
        permanent: yes
@@ -109,78 +129,119 @@
        enabled: yes
      when: ansible_distribution == "OracleLinux" and firewalld.changed
 
+#=====================================================================PLAYS FOR DATABASE SERVERS========================================================================
+
 - name: Configure database servers
   hosts: db_servers
-  become: yes
-  
+  become: yes  
   tasks:
-    - name: Install MySQL on Ubuntu
+
+#---------------------------Install and activate mySQL server------------------------
+
+    - name: Install MySQL
+      tags: get_mysql
       package:
         name: mysql-server
         state: latest
 
-
-    - name: Start and enable MySQL on Ubuntu
-      service:
-        name: mysql
-        state: started
-        enabled: yes
-      when: ansible_distribution == 'Ubuntu'
-
     - name: Start and enable MySQL on OracleLinux
+      tags: get_mysql
       service:
         name: mysqld
         state: started
         enabled: yes
       when: ansible_distribution == 'OracleLinux'
 
+#----------------------Install Ansible requirements for mysql_user module----------------------------
+
+    - name: Install mysql_user requirements (Ubuntu)
+      tags: mysql_config
+      apt:
+        name: 
+         - python3-pip, python3-virtualenv, python3-wheel, gcc
+         - python3-dev, default-libmysqlclient-dev, build-essential, pkg-config
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install mysql_user requirements (Oracle Linux)
+      tags: mysql_config
+      dnf:
+        name:
+         - python3-pip, python3-virtualenv, python3-wheel
+         - python3-devel, mysql-devel, pkgconfig, gcc
+      when: ansible_distribution == "OracleLinux"
+
+
+    - name: Install mysqlclient python package
+      tags: mysql_config
+      ansible.builtin.pip:
+         name: mysqlclient
+
+
+# -------------Login with default credentials and set root user password------------------------------
 
     - name: Set MySQL root password on Ubuntu
+      tags: mysql_config
       mysql_user:
         name: root
         password: mySQLingryd
         host: localhost
+        login_user: root
+        login_password: ''
       when: ansible_distribution == 'Ubuntu'
 
     - name: Set MySQL root password on OracleLinux
+      tags: mysql_config,mysql_setup
       mysql_user:
         name: root
         password: mySQLingryd
-        login_unix_socket: yes
+        state: present
+        host: localhost
+        login_user: root
+        login_password: ''
       when: ansible_distribution == 'OracleLinux'
 
+#=======================================================================PLAYS FOR FILE SERVERS===========================================================================
 
 - name: File Servers
   hosts: file_servers
   become: yes
   tasks:
-   
+
+#-------------------Install and enable samba---------------
+
   - name: Install samba on every file server
+    tags: get_samba
     package:
       name: samba
       state: latest
 
   - name: Start and enable samba
+    tags: get_samba
     service: 
       name: samba
       state: started
       enabled: yes
 
+#------------Configure Firewall to allow samba--------------
 
   - name: Configure Firewall for samba (Ubuntu)
+    tags: allow_samba
     ufw:
       name: "Samba"
       rule: allow
     when: ansible_distribution == "Ubuntu"
 
   - name: Configure Firewall for Samba (Oracle Linux)
+    tags: allow_samba
     firewalld:
       service: samba
       permanent: yes
     when: ansible_distribution == "OracleLinux"
 
+#----------Copy admin_manual to each node---------------------
   
   - name: Copy admin_manual to each node
+    tags: admin_manual
     copy:
       src: admin_manual
       dest: /usr/local/bin/admin_manual
@@ -188,8 +249,21 @@
       group: admin1
       mode: 0440
 
+#------------------------------------Download Pycharm--------------------------------
 
   - name: Download Pycharm Community Edition to each node
+    tags: get_pycharm
     get_url:
       url: "https://download.jetbrains.com/python/pycharm-community-2021.3.1.tar.gz"
       dest: /usr/local/bin/pycharm-community-2021.3.1.tar.gz
+
+
+#=======================================================================ANSIBLE VAULT PLAY===============================================================================---
+- hosts: all
+  become: true
+  tasks:
+   - name: Copy encrypted passwords file to nodes
+     tags: vault,copy_pass
+     copy:
+       src: passwords
+       dest: /home/admin1/passwords
