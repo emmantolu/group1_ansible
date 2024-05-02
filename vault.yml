@@ -1,0 +1,12 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+   - name: Copy encrypted passwords file to nodes
+     tags: vault,copy_pass
+     copy:
+        src: passwords
+        dest: /home/admin1/passwords
+

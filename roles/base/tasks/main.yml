@@ -1,5 +1,50 @@
-- name: Copy encrypted passwords file to nodes
-  tags: vault,copy_pass
+#==========================================================FULLY UPDATE MULTI-DISTRO SOFTWARE===========================================================================
+
+- name: Fully Update Software (OracleLinux)
+  dnf:
+    update_only: yes
+    update_cache: yes
+  when: ansible_distribution == "OracleLinux"
+
+- name: Fully Update Software (Ubuntu)
+  apt:
+    upgrade: dist
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
+#=======================================================CREATE ADMIN1 USER AND MAKE ADMIN1 A SUDOER=====================================================================
+
+- name: Create user admin1 (Ubuntu)
+  user:
+    name: admin1
+    groups:
+     - sudo
+     - adm
+     - root
+    shell: /bin/bash
+  when: ansible_distribution == "Ubuntu"
+
+- name: Create user admin1 (Oracle Linux)
+  user:
+    name: admin1
+    groups:
+     - wheel
+     - adm
+     - root
+  when: ansible_distribution == "OracleLinux"
+
+
+- name: Make admin1 user a sudoer
   copy:
-    src: passwords
-    dest: /home/admin1/passwords
+    src: sudoer_admin1
+    dest: /etc/sudoers.d/admin1
+    owner: root
+    group: root
+    mode: 0440
+
+#----------------------------Add SSH key for admin1-----------------------------------------------
+
+- name: Add ansible ssh key to each node
+  authorized_key:
+    user: admin1
+    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIw6EVTVUZ+ZCg/VX9+FsRltfmCUalvOKvrtMvXr+K6j Ansible
