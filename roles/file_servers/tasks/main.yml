@@ -6,12 +6,22 @@
     name: samba
     state: latest
 
-- name: Start and enable samba
+- name: Start and enable samba (Ubuntu)
   tags: get_samba,file_servers
   service:
-    name: samba
+    name: smbd
     state: started
     enabled: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: Start and enable samba (Oracle Linux)
+  tags: get_samba,file_servers
+  service:
+    name: smb
+    state: started
+    enabled: yes
+  when: ansible_distribution == "OracleLinux"
+
 
 #------------Configure Firewall to allow samba--------------
 
@@ -26,6 +36,7 @@
   tags: allow_samba,file_servers
   firewalld:
     service: samba
+    state: enabled
     permanent: yes
   when: ansible_distribution == "OracleLinux"
 

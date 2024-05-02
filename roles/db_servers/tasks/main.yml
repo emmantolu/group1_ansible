@@ -53,9 +53,9 @@
   tags: mysql_config,mysql_setup,db_servers
   mysql_user:
     name: root
-    password: mySQLingryd
+    password: ""
     state: present
     host: localhost
     login_user: root
-    login_password: ""
+    login_password: mySQLingryd 
   when: ansible_distribution == 'OracleLinux'
